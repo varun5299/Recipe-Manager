@@ -1,32 +1,22 @@
 package com.practice.recipe.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import java.util.Set;
 
+
+@Getter
+@Setter
 @Entity
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String String;
+    private String description;
 
     @ManyToMany(mappedBy = "categories")
     private Set<Recipe> recipes;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public java.lang.String getString() {
-        return String;
-    }
-
-    public void setString(java.lang.String string) {
-        String = string;
-    }
 }
