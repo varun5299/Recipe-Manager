@@ -1,12 +1,14 @@
-package com.practice.recipe.services;
+package com.practice.recipe.services.implementation;
 
 import com.practice.recipe.command.RecipeCommand;
 import com.practice.recipe.converters.RecipeCommandToRecipe;
 import com.practice.recipe.converters.RecipeToRecipeCommand;
 import com.practice.recipe.model.Recipe;
 import com.practice.recipe.repositories.RecipeRepository;
+import com.practice.recipe.services.RecipeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -27,54 +29,43 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public Set<Recipe> getAllRecipe() {
-
-        Set<Recipe> recipes = new HashSet<>();
-
-        recipeRepository.findAll().iterator().forEachRemaining(recipes::add);
-        return recipes;
+    public Set<Recipe> getRecipes() {
+        log.debug("I am in the service..");
+        Set<Recipe> recipeSet = new HashSet<>();
+        recipeRepository.findAll().iterator().forEachRemaining(recipeSet::add);
+        return recipeSet;
     }
 
     @Override
-    public Recipe getRecipeById(Long id) {
-        Optional<Recipe> recipeOptional = recipeRepository.findById(id);
+    public Recipe findById(Long l) {
+        Optional<Recipe> recipeOptional = recipeRepository.findById(l);
 
         if (!recipeOptional.isPresent()) {
             throw new RuntimeException("Recipe Not Found!");
         }
 
         return recipeOptional.get();
-
     }
 
-    @Override
-    public RecipeCommand savedRecipeCommand(RecipeCommand recipeCommand) {
-        Recipe detachedRecipe = recipeCommandToRecipe.convert(recipeCommand);
 
-        Recipe savedRecipe = recipeRepository.save(detachedRecipe);
-        log.debug("Saved RecipeId:" + savedRecipe.getId());
+
+    @Override
+    @Transactional
+    public RecipeCommand saveRecipeCommand(RecipeCommand command) {
+        Recipe detachRecipe = recipeCommandToRecipe.convert(command);
+        Recipe savedRecipe = recipeRepository.save(detachRecipe);
+        log.debug("Saved Recipe with ID: - "+savedRecipe.getId());
         return recipeToRecipeCommand.convert(savedRecipe);
     }
 
     @Override
-    public Recipe findById(Long id) {
-
-        Optional<Recipe> recipeOptional = recipeRepository.findById(id);
-
-        if (!recipeOptional.isPresent()) {
-            throw new RuntimeException("Recipe Not Found!");
-        }
-
-        return recipeOptional.get();
+    @Transactional
+    public RecipeCommand findCommandById(Long l) {
+        return recipeToRecipeCommand.convert(findById(l));
     }
 
     @Override
-    public void deleteRecipeById(Long id) {
-        recipeRepository.deleteById(id);
-    }
-
-    @Override
-    public RecipeCommand findCommandbyId(Long id) {
-        return recipeToRecipeCommand.convert(findById(id));
+    public void deleteById(Long l) {
+        recipeRepository.deleteById(l);
     }
 }
